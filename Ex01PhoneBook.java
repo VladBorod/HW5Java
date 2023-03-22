@@ -1,15 +1,15 @@
 
 //Реализуйте структуру телефонной книги с помощью HashMap,
 //учитывая, что 1 человек может иметь несколько телефонов.
+//java.lang.ClassCastException: java.util.Arrays$ArrayList cannot be cast to java.util.ArrayList из-за данной ошибки
+// добавление дополнительного номера у меня не сработало!
 
 
 import java.util.*;
-import java.util.HashMap;
 
 public class Ex01PhoneBook {
     public static void main(String[] args) {
-        Map<Person, List<Phone>> phoneBook = new HashMap<>();
-//        Map<Person, List<Phone>> newPhoneBook = new HashMap<>();
+        Map<String, List<Long>> phoneBook = new HashMap<>();
 
         Scanner go = new Scanner(System.in);
         System.out.println("Введите функцию: \n" +
@@ -20,12 +20,12 @@ public class Ex01PhoneBook {
                 "5. Удаление абонента. \n");
 
         int operation = 0;
-        while (operation >= 0 && operation < 5){
+        while (operation >= 0 && operation <= 5){
             operation = go.nextInt();
             switch (operation){
                 case 1:
 //                    Добавление абонента.
-                    subscriberAdder(phoneBook);
+                    System.out.println(subscriberAdder(phoneBook));
                     System.out.println("Введите функцию: \n" +
                             "1. Внесение нового абонента. \n" +
                             "2. Добавление нового номера абонента. \n" +
@@ -36,6 +36,7 @@ public class Ex01PhoneBook {
                 case 2:
 //                    Добавление номера для абонента.
                     System.out.println("Добавляем новый номер абонента: ");
+                    subscriberNumberAdder(phoneBook);
                     System.out.println("Введите функцию: \n" +
                             "1. Внесение нового абонента. \n" +
                             "2. Добавление нового номера абонента. \n" +
@@ -45,8 +46,8 @@ public class Ex01PhoneBook {
                     break;
                 case 3:
 //                    Поиск абонента.
-                    subscriberSearcher(phoneBook);
-//                    System.out.println("Ищем абонента по имени и фамилии: ");
+                    System.out.printf("Номер искомого абонента: ");
+                    System.out.println(subscriberSearcher(phoneBook));
                     System.out.println("Введите функцию: \n" +
                             "1. Внесение нового абонента. \n" +
                             "2. Добавление нового номера абонента. \n" +
@@ -56,8 +57,8 @@ public class Ex01PhoneBook {
                     break;
                 case 4:
 //                    Вывод всего справочника.
+                    System.out.println("Ваш справочник: ");
                     phoneBookOutput(phoneBook);
-//                    System.out.println(phoneBookOutput(phoneBook));
                     System.out.println("Введите функцию: \n" +
                             "1. Внесение нового абонента. \n" +
                             "2. Добавление нового номера абонента. \n" +
@@ -67,6 +68,7 @@ public class Ex01PhoneBook {
                     break;
                 case 5:
                     System.out.println("Удаление абонента: ");
+                    subscriberDeleter(phoneBook);
                     System.out.println("Введите функцию: \n" +
                             "1. Внесение нового абонента. \n" +
                             "2. Добавление нового номера абонента. \n" +
@@ -81,88 +83,67 @@ public class Ex01PhoneBook {
         }
         go.close();
     }
-    public static Map<Person, List<Phone>> subscriberAdder(Map dict){
+//Удаление пользователя.
+    private static void subscriberDeleter(Map<String, List<Long>> dict) {
+        Scanner fn = new Scanner(System.in);
+        System.out.println("Введите имя и фамилию пользователя через пробел: ");
+        String fullname = fn.nextLine().toUpperCase();
+        if (dict.containsKey(fullname)){
+            System.out.println("Пользователь удален!");
+            dict.remove(fullname);
+        }
+    }
+//Изменение номера телефона пользователя.
+    private static String subscriberNumberAdder(Map<String, List<Long>> dict) {
+        Scanner fn = new Scanner(System.in);
+        System.out.println("Введите имя и фамилию пользователя через пробел: ");
+        String fullname = fn.nextLine().toUpperCase();
+        String someSub;
+        if (dict.containsKey(fullname)) {
+            someSub = String.valueOf(dict.get(fullname).toString());
+            Scanner nn = new Scanner(System.in);
+
+            System.out.println("Введите новый номер: ");
+            List<Long> newNumber = new ArrayList<>();
+                newNumber.add(Long.valueOf(nn.next()));
+            dict.put(fullname,
+                    newNumber);
+        }else {
+            someSub = "Такого абонента нет!";
+        }
+        return someSub;
+    }
+//Добавление пользователя.
+    public static Map<String, List<Long>> subscriberAdder(Map dict){
         Scanner in = new Scanner(System.in);
-        System.out.printf("Введите имя абонента: ");
-        String name = in.nextLine().toUpperCase();
-        Scanner lin = new Scanner(System.in);
-        System.out.printf("Введите фамилию абонента: ");
-        String lastName = lin.nextLine().toUpperCase();
+        System.out.printf("Введите имя и фамилию абонента: ");
+        String fullName = in.nextLine().toUpperCase();
+
         Scanner nm = new Scanner(System.in);
         System.out.printf("Введите номер телефона абонента, если у абонента несколько номеров - введите их через пробел: ");
-        long number = nm.nextLong();
+        List<Long> number = new ArrayList<>();
+                number.add(Long.valueOf(nm.next()));
 
-        dict.putIfAbsent(new Person(name, lastName), Arrays.asList(new Phone(number)));
+        dict.putIfAbsent(fullName, Arrays.asList(number));
         return dict;
     }
-    public static Map<Person, List<Phone>> phoneBookOutput(Map<Person, List<Phone>> dict){
+//Вывод всего справочника.
+    public static void phoneBookOutput(Map<String, List<Long>> dict){
 
-        dict.entrySet().forEach(
-                entry -> entry.getValue().forEach(
-                        phone -> {
-                            Person person = entry.getKey();
-                        System.out.println(person.name + "  " + person.lastName + "   " + phone.numberPhone);
-                        }
-                )
-        );
-        return dict;
+        System.out.println(dict);
     }
-    public static Map<Person, List<Phone>> subscriberSearcher(Map<Person, List<Phone>> dict){
-        Map<Person, List<Phone>> newPhoneBook = new HashMap<>();
+//Поиск пользователя.
+    public static String subscriberSearcher(Map<String, List<Long>> dict) {
 
         Scanner fn = new Scanner(System.in);
-        System.out.println("Введите имя пользователя: ");
-        String name = fn.nextLine().toUpperCase();
-        Scanner fln = new Scanner(System.in);
-        System.out.println("Введите фамилию пользователя: ");
-        String lastName = fln.nextLine().toUpperCase();
-
-//        newPhoneBook.put(new Person(name, lastName), new ArrayList<>(1));
-
-        for (Map.Entry<Person, List<Phone>> i:dict.entrySet()) {
-            if (newPhoneBook.containsKey(i.getKey())) {
-                System.out.println(i.getKey());
-                System.out.println(i.getValue());
-            }
-//        Person s;
-//        for (Person id:dict.keySet()) {
-//            if (id.containsKey(newPhoneBook.keySet())) {
-//                return true;
-//            }
-//            return id.containsKey(newPhoneBook.keySet());
-//        }
-//        a = newPhoneBook.keySet();
-
-            return dict;
+        System.out.println("Введите имя и фамилию пользователя через пробел: ");
+        String fullname = fn.nextLine().toUpperCase();
+        String someSub;
+        if (dict.containsKey(fullname)) {
+            someSub = String.valueOf(dict.get(fullname).toString());
+        }else {
+            someSub = "Такого абонента нет!";
         }
-        return dict;
-    }
-
-}
-class Phone{
-    public long numberPhone;
-
-    public Phone(long numberPhone){
-        this.numberPhone = numberPhone;
-    }
-
-}
-class Person{
-    public String name;
-    public String lastName;
-
-    public Person(String name, String lastName){
-        this.name = name;
-        this.lastName = lastName;
-    }
-
-    @Override
-    public String toString() {return String.format("%d %s", lastName, name);
-    }
-
-    @Override
-    public boolean equals(Object s) {
-        var t = (Person) s;
-        return name == t.name && lastName == t.lastName;
+        return someSub;
     }
 }
